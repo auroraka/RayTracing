@@ -25,7 +25,7 @@ namespace tl {
 		friend Vector& operator *= (Vector&, const Vector&);
 		friend Vector operator - (const Vector&);
 		
-		double Dot(const Vector& term) {
+		double dot(const Vector& term) {
 			return x * term.x + y * term.y + z * term.z;
 		}
 
@@ -63,12 +63,12 @@ namespace tl {
 		}
 
 		Vector getReflectDir(Vector N) {
-			return *this - N * (2 * Dot(N));
+			return *this - N * (2 * dot(N));
 		}
 
 		Vector getRefractDir(Vector N, double n) {
 			Vector V = normal();
-			double cosI = -N.Dot(V), cosT2 = 1 - (n * n) * (1 - cosI * cosI);
+			double cosI = -N.dot(V), cosT2 = 1 - (n * n) * (1 - cosI * cosI);
 			if (cosT2 > EPS) return V * n + N * (n * cosI - sqrt(cosT2));
 			return V.getReflectDir(N);
 		}

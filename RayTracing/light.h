@@ -37,14 +37,14 @@ namespace tl {
 		bool intersect(Vector ray_O, Vector ray_V) {
 			ray_V = ray_V.normal();
 			Vector N = (Dx * Dy).normal();
-			double d = N.Dot(ray_V);
+			double d = N.dot(ray_V);
 			if (fabs(d) < EPS) return false;
-			double l = (N * O.Dot(N) - ray_O).Dot(N) / d;
+			double l = (N * O.dot(N) - ray_O).dot(N) / d;
 			if (l < EPS) return false;
 
 			Vector C = (ray_O + ray_V * l) - O;
-			if (fabs(Dx.Dot(C)) > Dx.Dot(Dx)) return false;
-			if (fabs(Dy.Dot(C)) > Dy.Dot(Dy)) return false;
+			if (fabs(Dx.dot(C)) > Dx.dot(Dx)) return false;
+			if (fabs(Dy.dot(C)) > Dy.dot(Dy)) return false;
 
 			crash_dist = l;
 			return true;

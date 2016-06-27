@@ -23,25 +23,25 @@ namespace tl {
 		}
 		int GetH() { return H; }
 		int GetW() { return W; }
-		Color GetColor(int i, int j) { return toColor(pic.at<Vec3b>(H - 1 - i, j)); }
-		void SetColor(int i, int j, Color color) {
+		Color colorAt(int i, int j) { return toColor(pic.at<Vec3b>(H - 1 - i, j)); }
+		void draw(int i, int j, Color color) {
 			pic.at<Vec3b>(H - 1 - i, j) = toVec3b(color);
 		}
 
-		void Initialize(int _H, int _W) {
+		void init(int _H, int _W) {
 			H = _H;
 			W = _W;
 			pic = Mat(H, W, CV_8UC3);
 		}
-		void Input(std::string file) {
+		void read(std::string file) {
 			pic = imread(file);
 			H = pic.rows;
 			W = pic.cols;
 		}
-		void Output() {
+		void write() {
 			imwrite("output.jpg", pic);
 		}
-		Color GetSmoothColor(double u, double v) {
+		Color colorSmoothAt(double u, double v) {
 			double U = (u - floor(u)) * H;
 			double V = (v - floor(v)) * W;
 			int U1 = (int)floor(U + EPS), U2 = U1 + 1;
@@ -51,10 +51,10 @@ namespace tl {
 			if (U1 < 0) U1 = H - 1; if (U2 == H) U2 = 0;
 			if (V1 < 0) V1 = W - 1; if (V2 == W) V2 = 0;
 			Color ret;
-			ret = ret + GetColor(U1, V1) * rat_U * rat_V;
-			ret = ret + GetColor(U1, V2)* rat_U * (1 - rat_V);
-			ret = ret + GetColor(U2, V1)* (1 - rat_U) * rat_V;
-			ret = ret + GetColor(U2, V2)* (1 - rat_U) * (1 - rat_V);
+			ret = ret + colorAt(U1, V1) * rat_U * rat_V;
+			ret = ret + colorAt(U1, V2)* rat_U * (1 - rat_V);
+			ret = ret + colorAt(U2, V1)* (1 - rat_U) * rat_V;
+			ret = ret + colorAt(U2, V2)* (1 - rat_U) * (1 - rat_V);
 			return ret;
 
 		}

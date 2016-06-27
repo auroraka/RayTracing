@@ -75,7 +75,7 @@ namespace tl {
 		bool intersect(Vector ray_O, Vector ray_V) {
 			ray_V = ray_V.normal();
 			Vector P = ray_O - O;
-			double b = -P.Dot(ray_V);
+			double b = -P.dot(ray_V);
 			double det = b * b - P.len2() + R * R;
 
 			if (det > EPS) {
@@ -103,11 +103,11 @@ namespace tl {
 
 		Color GetTexture() {
 			Vector I = (irst.C - O).normal();
-			double a = acos(-I.Dot(De));
-			double b = acos(std::min(std::max(I.Dot(Dc) / sin(a), -1.0), 1.0));
+			double a = acos(-I.dot(De));
+			double b = acos(std::min(std::max(I.dot(Dc) / sin(a), -1.0), 1.0));
 			double u = a / PI, v = b / 2 / PI;
-			if (I.Dot(Dc * De) < 0) v = 1 - v;
-			return material->texture->GetSmoothColor(u, v);
+			if (I.dot(Dc * De) < 0) v = 1 - v;
+			return material->texture->colorSmoothAt(u, v);
 		}
 
 		Object* PrimitiveCopy() {
@@ -175,9 +175,9 @@ namespace tl {
 		bool intersect(Vector ray_O, Vector ray_V) {
 			ray_V = ray_V.normal();
 			N = N.normal();
-			double d = N.Dot(ray_V);
+			double d = N.dot(ray_V);
 			if (fabs(d) < EPS) return false;
-			double l = (N * R - ray_O).Dot(N) / d;
+			double l = (N * R - ray_O).dot(N) / d;
 			if (l < EPS) return false;
 
 			irst.dist = l;
@@ -188,9 +188,9 @@ namespace tl {
 		}
 
 		Color GetTexture() {
-			double u = irst.C.Dot(Dx) / Dx.len2();
-			double v = irst.C.Dot(Dy) / Dy.len2();
-			return material->texture->GetSmoothColor(u, v);
+			double u = irst.C.dot(Dx) / Dx.len2();
+			double v = irst.C.dot(Dy) / Dy.len2();
+			return material->texture->colorSmoothAt(u, v);
 		}
 
 		Object* PrimitiveCopy() {
@@ -209,7 +209,7 @@ namespace tl {
 			material->refl = 0.7;
 			material->drefl = 0.15;
 			material->texture = new Picture;
-			material->texture->Input("test1.jpg");
+			material->texture->read("test1.jpg");
 
 
 		}

@@ -8,7 +8,7 @@
 
 namespace tl {
 	const double SPEC_POWER = 20;
-	const int MAX_DREFL_DEP = 2;
+	const int MAX_DREFL_DEEP = 2;
 	const int MAX_RAYTRACING_DEP = 10;
 
 
@@ -26,15 +26,15 @@ namespace tl {
 				if (shade < EPS) continue;
 
 				Vector R = (light->GetO() - pri->irst.C).normal();
-				double dot = R.Dot(pri->irst.N);
-				if (dot > EPS) {
+				double RN = R.dot(pri->irst.N);
+				if (RN > EPS) {
 
 					if (pri->GetMaterial()->diff > EPS) {
-						double diff = pri->GetMaterial()->diff * dot * shade;
+						double diff = pri->GetMaterial()->diff * RN * shade;
 						ret += color * light->GetColor() * diff;
 					}
 					if (pri->GetMaterial()->spec > EPS) {
-						double spec = pri->GetMaterial()->spec * pow(dot, SPEC_POWER) * shade;
+						double spec = pri->GetMaterial()->spec * pow(RN, SPEC_POWER) * shade;
 						ret += color * light->GetColor() * spec;
 					}
 				}
@@ -43,11 +43,11 @@ namespace tl {
 			return ret;
 		}
 
-		Color getReflection(Object* pri, Vector ray_V, int dep) {
+		Color getReflection(Object* pri, Vector ray_V, int deep) {
 			ray_V = ray_V.getReflectDir(pri->irst.N);
 
-			if (pri->GetMaterial()->drefl < EPS || dep > MAX_DREFL_DEP)
-				return rayTracing(pri->irst.C, ray_V, dep + 1) * pri->GetMaterial()->color * pri->GetMaterial()->refl;
+			if (pri->GetMaterial()->drefl < EPS || deep > MAX_DREFL_DEEP)
+				return rayTracing(pri->irst.C, ray_V, deep + 1) * pri->GetMaterial()->color * pri->GetMaterial()->refl;
 
 			Vector Dx = ray_V * Vector(1, 0, 0);
 			if (Dx.isZero()) Dx = Vector(1, 0, 0);
@@ -65,28 +65,28 @@ namespace tl {
 				x *= pri->GetMaterial()->drefl;
 				y *= pri->GetMaterial()->drefl;
 
-				ret += rayTracing(pri->irst.C, ray_V + Dx * x + Dy * y, dep + MAX_DREFL_DEP);
+				ret += rayTracing(pri->irst.C, ray_V + Dx * x + Dy * y, deep + MAX_DREFL_DEEP);
 			}
 
 			ret = ret * pri->GetMaterial()->color * pri->GetMaterial()->refl / (16 * scene.GetCamera()->GetDreflQuality());
 			return ret;
 		}
 
-		Color getRefraction(Object* pri, Vector ray_V, int dep) {
+		Color getRefraction(Object* pri, Vector ray_V, int deep) {
 			double n = pri->GetMaterial()->rindex;
 			if (pri->irst.front) n = 1 / n;
 
 			ray_V = ray_V.getRefractDir(pri->irst.N, n);
 
-			Color rcol = rayTracing(pri->irst.C, ray_V, dep + 1);
+			Color rcol = rayTracing(pri->irst.C, ray_V, deep + 1);
 			if (pri->irst.front) return rcol * pri->GetMaterial()->refr;
 			Color absor = pri->GetMaterial()->absor * -pri->irst.dist;
 			Color trans = Color(exp(absor.r), exp(absor.g), exp(absor.b));
 			return rcol * trans * pri->GetMaterial()->refr;
 		}
 
-		Color rayTracing(Vector ray_O, Vector ray_V, int dep) {
-			if (dep > MAX_RAYTRACING_DEP) return Color();
+		Color rayTracing(Vector ray_O, Vector ray_V, int deep) {
+			if (deep > MAX_RAYTRACING_DEP) return Color();
 
 			Color ret;
 			Object* nearest_primitive = scene.intersectWithObject(ray_O, ray_V);
@@ -99,8 +99,8 @@ namespace tl {
 			if (nearest_primitive != NULL) {
 				Object* obj = nearest_primitive->PrimitiveCopy();
 				if (obj->GetMaterial()->diff > EPS || obj->GetMaterial()->spec > EPS) ret += getDiffusion(obj);
-				if (obj->GetMaterial()->refl > EPS) ret += getReflection(obj, ray_V, dep);
-				if (obj->GetMaterial()->refr > EPS) ret += getRefraction(obj, ray_V, dep);
+				if (obj->GetMaterial()->refl > EPS) ret += getReflection(obj, ray_V, deep);
+				if (obj->GetMaterial()->refr > EPS) ret += getRefraction(obj, ray_V, deep);
 				delete obj;
 			}
 
@@ -126,11 +126,11 @@ namespace tl {
 				for (int j = 0; j < W; j++) {
 					Vector ray_V = camera->lookAt(i, j);
 					Color color = rayTracing(ray_O, ray_V, 1);
-					scene.picture->SetColor(i, j, color);
+					scene.picture->draw(i, j, color);
 				}
 			}
 
-			scene.picture->Output();
+			scene.picture->write();
 		}
 	};
 
