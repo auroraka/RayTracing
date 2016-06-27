@@ -71,7 +71,6 @@ namespace tl {
 		}
 		~Sphere() {}
 
-		void Input(std::string, std::stringstream&);
 		bool intersect(Vector ray_O, Vector ray_V) {
 			ray_V = ray_V.normal();
 			Vector P = ray_O - O;

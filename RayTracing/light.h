@@ -8,6 +8,7 @@
 #include<sstream>
 #include<string>
 #include<cmath>
+#include <vector>
 
 namespace tl {
 
@@ -15,7 +16,6 @@ namespace tl {
 	protected:
 		int sample;
 		Color color;
-		Light* next;
 
 	public:
 		double crash_dist;
@@ -25,13 +25,10 @@ namespace tl {
 
 		int GetSample() { return sample; }
 		Color GetColor() { return color; }
-		Light* GetNext() { return next; }
-		void SetNext(Light* light) { next = light; }
 		Vector GetO() { return O; }
 
 		Light() {
 			sample = rand();
-			next = NULL;
 		}
 
 		bool intersect(Vector ray_O, Vector ray_V) {
@@ -50,7 +47,7 @@ namespace tl {
 			return true;
 		}
 
-		double getShade(Vector C, Object* primitive_head, int shade_quality) {
+		double getShade(Vector C, std::vector<Object*> &objs, int shade_quality) {
 			int shade = 0;
 
 			for (int i = -2; i < 2; i++)
@@ -59,11 +56,12 @@ namespace tl {
 						Vector V = O - C + Dx * ((ran() + i) / 2) + Dy * ((ran() + j) / 2);
 						double dist = V.len();
 
-						for (Object* now = primitive_head; now != NULL; now = now->GetNext())
-							if (now->intersect(C, V) && (now->irst.dist < dist)) {
+						for (int i = 0; i < objs.size(); i++) {
+							if (objs[i]->intersect(C, V) && (objs[i]->irst.dist < dist)) {
 								shade++;
 								break;
 							}
+						}
 					}
 
 			return 1 - (double)shade / (16.0 * shade_quality);

@@ -21,10 +21,9 @@ namespace tl {
 
 			Color ret = color * scene.GetBackgroundColor() * pri->GetMaterial()->diff;
 
-			for (Light* light = scene.GetLightHead(); light != NULL; light = light->GetNext()) {
-				double shade = light->getShade(pri->irst.C, scene.GetPrimitiveHead(), scene.GetCamera()->GetShadeQuality());
-				if (shade < EPS) continue;
-
+			Light* light = scene.GetLight();
+			double shade = light->getShade(pri->irst.C, scene.objs, scene.GetCamera()->GetShadeQuality());
+			if (shade > EPS) {
 				Vector R = (light->GetO() - pri->irst.C).normal();
 				double RN = R.dot(pri->irst.N);
 				if (RN > EPS) {

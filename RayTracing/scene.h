@@ -9,45 +9,42 @@
 #include<string>
 #include<fstream>
 #include<sstream>
+#include <vector>
+using namespace std;
 
 namespace tl {
 	class Scene {
-		Object* primitive_head;
-		Light* light_head;
+		Light* light;
 		Color background_color;
 		Camera* camera;
 	
 	public:
+		vector<Object*> objs;
 		Picture* picture;
 
-		Object* GetPrimitiveHead() { return primitive_head; }
-		Light* GetLightHead() { return light_head; }
+		Light* GetLight() { return light; }
 		Color GetBackgroundColor() { return background_color; }
 		Camera* GetCamera() { return camera; }
 
 
 		Scene() {
-			primitive_head = NULL;
-			light_head = NULL;
+			objs.clear();
+			light = NULL;
 			background_color = Color();
 			camera = new Camera;
 		}
 
 		~Scene() {
-			while (primitive_head != NULL) {
-				Object* next_head = primitive_head->GetNext();
-				if (primitive_head->GetMaterial()->texture != NULL)
-					delete primitive_head->GetMaterial()->texture;
-				delete primitive_head;
-				primitive_head = next_head;
+			for (int i = 0; i < objs.size(); i++) {
+				if (objs[i]->GetMaterial()->texture != NULL) {
+					delete objs[i]->GetMaterial()->texture;
+					delete objs[i];
+				}
+				delete objs[i];
 			}
-
-			while (light_head != NULL) {
-				Light* next_head = light_head->GetNext();
-				delete light_head;
-				light_head = next_head;
-			}
-
+			objs.clear();
+			
+			delete light;
 			delete camera;
 		}
 
@@ -65,25 +62,21 @@ namespace tl {
 			camera->makeDemo(H,W);
 
 			//light
-			new_light = new Light;
-			new_light->SetNext(light_head);
-			light_head = new_light;
-			new_light->makeDemo();
+			light = new Light;
+			light->makeDemo();
 
 			//obj
+			Object* obj;
 			for (int i = 0; i < 5; i++) {
-				new_primitive = new Sphere;
-				new_primitive->SetNext(primitive_head);
-				primitive_head = new_primitive;
-				new_primitive->makeDemo(i);
+				obj = new Sphere;
+				obj->makeDemo(i);
+				objs.push_back(obj);
 			}
 
 			//plane
-			new_primitive = new Plane;
-			new_primitive->SetNext(primitive_head);
-			primitive_head = new_primitive;
-			new_primitive->makeDemo(5);
-
+			obj = new Plane;
+			obj->makeDemo(5);
+			objs.push_back(obj);
 
 
 			camera->init();
@@ -92,19 +85,19 @@ namespace tl {
 		Object* intersectWithObject(Vector ray_O, Vector ray_V) {
 			Object* ret = NULL;
 
-			for (Object* now = primitive_head; now != NULL; now = now->GetNext())
-				if (now->intersect(ray_O, ray_V) && (ret == NULL || now->irst.dist < ret->irst.dist)) ret = now;
-
+			for (int i = 0; i < objs.size(); i++) {
+				if (objs[i]->intersect(ray_O, ray_V) && (ret == NULL || objs[i]->irst.dist < ret->irst.dist)) ret = objs[i];
+			}
 			return ret;
 		}
 
 		Light* intersectWithLight(Vector ray_O, Vector ray_V) {
-			Light* ret = NULL;
-
-			for (Light* now = light_head; now != NULL; now = now->GetNext())
-				if (now->intersect(ray_O, ray_V) && (ret == NULL || now->crash_dist < ret->crash_dist)) ret = now;
-
-			return ret;
+			if (light->intersect(ray_O, ray_V)) {
+				return light;
+			}
+			else {
+				return NULL;
+			}
 		}
 
 	};
