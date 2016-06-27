@@ -2,7 +2,7 @@
 #define LIGHT_H
 
 #include "basic.h"
-#include"vector3.h"
+#include"vector.h"
 #include"color.h"
 #include"object.h"
 #include<sstream>
@@ -19,7 +19,7 @@ namespace tl {
 
 	public:
 		double crash_dist;
-		Vector3 O, Dx, Dy;
+		Vector O, Dx, Dy;
 
 		~Light() {}
 
@@ -27,22 +27,22 @@ namespace tl {
 		Color GetColor() { return color; }
 		Light* GetNext() { return next; }
 		void SetNext(Light* light) { next = light; }
-		Vector3 GetO() { return O; }
+		Vector GetO() { return O; }
 
 		Light() {
 			sample = rand();
 			next = NULL;
 		}
 
-		bool Collide(Vector3 ray_O, Vector3 ray_V) {
-			ray_V = ray_V.GetUnitVector();
-			Vector3 N = (Dx * Dy).GetUnitVector();
+		bool intersect(Vector ray_O, Vector ray_V) {
+			ray_V = ray_V.normal();
+			Vector N = (Dx * Dy).normal();
 			double d = N.Dot(ray_V);
 			if (fabs(d) < EPS) return false;
 			double l = (N * O.Dot(N) - ray_O).Dot(N) / d;
 			if (l < EPS) return false;
 
-			Vector3 C = (ray_O + ray_V * l) - O;
+			Vector C = (ray_O + ray_V * l) - O;
 			if (fabs(Dx.Dot(C)) > Dx.Dot(Dx)) return false;
 			if (fabs(Dy.Dot(C)) > Dy.Dot(Dy)) return false;
 
@@ -50,17 +50,17 @@ namespace tl {
 			return true;
 		}
 
-		double CalnShade(Vector3 C, Object* primitive_head, int shade_quality) {
+		double getShade(Vector C, Object* primitive_head, int shade_quality) {
 			int shade = 0;
 
 			for (int i = -2; i < 2; i++)
 				for (int j = -2; j < 2; j++)
 					for (int k = 0; k < shade_quality; k++) {
-						Vector3 V = O - C + Dx * ((ran() + i) / 2) + Dy * ((ran() + j) / 2);
-						double dist = V.Module();
+						Vector V = O - C + Dx * ((ran() + i) / 2) + Dy * ((ran() + j) / 2);
+						double dist = V.len();
 
 						for (Object* now = primitive_head; now != NULL; now = now->GetNext())
-							if (now->Collide(C, V) && (now->crash.dist < dist)) {
+							if (now->intersect(C, V) && (now->irst.dist < dist)) {
 								shade++;
 								break;
 							}
@@ -70,9 +70,9 @@ namespace tl {
 		}
 
 		void makeDemo() {
-			O = Vector3(3, 3, 3);
-			Dx = Vector3(1.5, 0, 0);
-			Dy = Vector3(0, 1.5, 0);
+			O = Vector(3, 3, 3);
+			Dx = Vector(1.5, 0, 0);
+			Dy = Vector(0, 1.5, 0);
 			color = Color(1, 1, 1);
 		}
 

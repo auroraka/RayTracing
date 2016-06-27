@@ -15,18 +15,18 @@ namespace tl {
 	class Raytracer {
 		Scene scene;
 
-		Color CalnDiffusion(Object* pri) {
+		Color getDiffusion(Object* pri) {
 			Color color = pri->GetMaterial()->color;
 			if (pri->GetMaterial()->texture != NULL) color = color * pri->GetTexture();
 
 			Color ret = color * scene.GetBackgroundColor() * pri->GetMaterial()->diff;
 
 			for (Light* light = scene.GetLightHead(); light != NULL; light = light->GetNext()) {
-				double shade = light->CalnShade(pri->crash.C, scene.GetPrimitiveHead(), scene.GetCamera()->GetShadeQuality());
+				double shade = light->getShade(pri->irst.C, scene.GetPrimitiveHead(), scene.GetCamera()->GetShadeQuality());
 				if (shade < EPS) continue;
 
-				Vector3 R = (light->GetO() - pri->crash.C).GetUnitVector();
-				double dot = R.Dot(pri->crash.N);
+				Vector R = (light->GetO() - pri->irst.C).normal();
+				double dot = R.Dot(pri->irst.N);
 				if (dot > EPS) {
 
 					if (pri->GetMaterial()->diff > EPS) {
@@ -43,17 +43,17 @@ namespace tl {
 			return ret;
 		}
 
-		Color CalnReflection(Object* pri, Vector3 ray_V, int dep) {
-			ray_V = ray_V.Reflect(pri->crash.N);
+		Color getReflection(Object* pri, Vector ray_V, int dep) {
+			ray_V = ray_V.getReflectDir(pri->irst.N);
 
 			if (pri->GetMaterial()->drefl < EPS || dep > MAX_DREFL_DEP)
-				return RayTracing(pri->crash.C, ray_V, dep + 1) * pri->GetMaterial()->color * pri->GetMaterial()->refl;
+				return rayTracing(pri->irst.C, ray_V, dep + 1) * pri->GetMaterial()->color * pri->GetMaterial()->refl;
 
-			Vector3 Dx = ray_V * Vector3(1, 0, 0);
-			if (Dx.IsZeroVector()) Dx = Vector3(1, 0, 0);
-			Vector3 Dy = ray_V * Dx;
-			Dx = Dx.GetUnitVector() * pri->GetMaterial()->drefl;
-			Dy = Dy.GetUnitVector() * pri->GetMaterial()->drefl;
+			Vector Dx = ray_V * Vector(1, 0, 0);
+			if (Dx.isZero()) Dx = Vector(1, 0, 0);
+			Vector Dy = ray_V * Dx;
+			Dx = Dx.normal() * pri->GetMaterial()->drefl;
+			Dy = Dy.normal() * pri->GetMaterial()->drefl;
 
 			Color ret;
 			for (int k = 0; k < 16 * scene.GetCamera()->GetDreflQuality(); k++) {
@@ -65,46 +65,46 @@ namespace tl {
 				x *= pri->GetMaterial()->drefl;
 				y *= pri->GetMaterial()->drefl;
 
-				ret += RayTracing(pri->crash.C, ray_V + Dx * x + Dy * y, dep + MAX_DREFL_DEP);
+				ret += rayTracing(pri->irst.C, ray_V + Dx * x + Dy * y, dep + MAX_DREFL_DEP);
 			}
 
 			ret = ret * pri->GetMaterial()->color * pri->GetMaterial()->refl / (16 * scene.GetCamera()->GetDreflQuality());
 			return ret;
 		}
 
-		Color CalnRefraction(Object* pri, Vector3 ray_V, int dep) {
+		Color getRefraction(Object* pri, Vector ray_V, int dep) {
 			double n = pri->GetMaterial()->rindex;
-			if (pri->crash.front) n = 1 / n;
+			if (pri->irst.front) n = 1 / n;
 
-			ray_V = ray_V.Refract(pri->crash.N, n);
+			ray_V = ray_V.getRefractDir(pri->irst.N, n);
 
-			Color rcol = RayTracing(pri->crash.C, ray_V, dep + 1);
-			if (pri->crash.front) return rcol * pri->GetMaterial()->refr;
-			Color absor = pri->GetMaterial()->absor * -pri->crash.dist;
+			Color rcol = rayTracing(pri->irst.C, ray_V, dep + 1);
+			if (pri->irst.front) return rcol * pri->GetMaterial()->refr;
+			Color absor = pri->GetMaterial()->absor * -pri->irst.dist;
 			Color trans = Color(exp(absor.r), exp(absor.g), exp(absor.b));
 			return rcol * trans * pri->GetMaterial()->refr;
 		}
 
-		Color RayTracing(Vector3 ray_O, Vector3 ray_V, int dep) {
+		Color rayTracing(Vector ray_O, Vector ray_V, int dep) {
 			if (dep > MAX_RAYTRACING_DEP) return Color();
 
 			Color ret;
-			Object* nearest_primitive = scene.FindNearestPrimitive(ray_O, ray_V);
-			Light* nearest_light = scene.FindNearestLight(ray_O, ray_V);
+			Object* nearest_primitive = scene.intersectWithObject(ray_O, ray_V);
+			Light* nearest_light = scene.intersectWithLight(ray_O, ray_V);
 
-			if (nearest_light != NULL && (nearest_primitive == NULL || nearest_light->crash_dist < nearest_primitive->crash.dist)) {
+			if (nearest_light != NULL && (nearest_primitive == NULL || nearest_light->crash_dist < nearest_primitive->irst.dist)) {
 				ret += nearest_light->GetColor();
 			}
 
 			if (nearest_primitive != NULL) {
 				Object* obj = nearest_primitive->PrimitiveCopy();
-				if (obj->GetMaterial()->diff > EPS || obj->GetMaterial()->spec > EPS) ret += CalnDiffusion(obj);
-				if (obj->GetMaterial()->refl > EPS) ret += CalnReflection(obj, ray_V, dep);
-				if (obj->GetMaterial()->refr > EPS) ret += CalnRefraction(obj, ray_V, dep);
+				if (obj->GetMaterial()->diff > EPS || obj->GetMaterial()->spec > EPS) ret += getDiffusion(obj);
+				if (obj->GetMaterial()->refl > EPS) ret += getReflection(obj, ray_V, dep);
+				if (obj->GetMaterial()->refr > EPS) ret += getRefraction(obj, ray_V, dep);
 				delete obj;
 			}
 
-			ret.Confine();
+			ret.normalize();
 			return ret;
 		}
 
@@ -115,17 +115,17 @@ namespace tl {
 
 		void run() {
 			Camera* camera = scene.GetCamera();
-			scene.CreateScene();
+			scene.createScene();
 
-			Vector3 ray_O = camera->GetO();
+			Vector ray_O = camera->GetO();
 			int H = camera->GetH(), W = camera->GetW();
 
 			
 			for (int i = 0; i < H; i++) {
 				std::cout << i <<" / "<<H<< std::endl;
 				for (int j = 0; j < W; j++) {
-					Vector3 ray_V = camera->Emit(i, j);
-					Color color = RayTracing(ray_O, ray_V, 1);
+					Vector ray_V = camera->lookAt(i, j);
+					Color color = rayTracing(ray_O, ray_V, 1);
 					scene.picture->SetColor(i, j, color);
 				}
 			}

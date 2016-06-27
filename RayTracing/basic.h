@@ -22,7 +22,7 @@ namespace tl {
 		return a*a;
 	}
 	inline double ran() {
-		return double(rand() % 32768) / 32768;
+		return double(rand())/RAND_MAX;
 	}
 
 

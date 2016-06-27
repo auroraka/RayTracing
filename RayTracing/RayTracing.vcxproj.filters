@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="vector3.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -50,7 +47,7 @@
     <ClInclude Include="scene.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="vector3.h">
+    <ClInclude Include="vector.h">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,7 @@
 #define CAMERA_H
 
 #include "basic.h"
-#include"vector3.h"
+#include"vector.h"
 #include"color.h"
 #include"picture.h"
 #include<string>
@@ -14,19 +14,19 @@ namespace tl {
 
 
 	class Camera {
-		Vector3 O, N, Dx, Dy;
+		Vector O, N, Dx, Dy;
 		double lens_W, lens_H;
 		int W, H;
 
 	public:
 
 		Camera() {
-			O = Vector3(0, 0, 0);
-			N = Vector3(0, 1, 0);
+			O = Vector(0, 0, 0);
+			N = Vector(0, 1, 0);
 		}
 
-		void Initialize() {
-			N = N.GetUnitVector();
+		void init() {
+			N = N.normal();
 			Dx = N.GetAnVerticalVector();
 			Dy = Dx * N;
 			Dx = Dx * lens_W / 2;
@@ -34,21 +34,13 @@ namespace tl {
 
 		}
 
-		Vector3 Emit(double i, double j) {
+		Vector lookAt(double i, double j) {
 			return N + Dy * (2 * i / H - 1) + Dx * (2 * j / W - 1);
 		}
 
-		/*void Output(Picture* bmp) {
-			bmp->Initialize(H, W);
-
-			for (int i = 0; i < H; i++)
-				for (int j = 0; j < W; j++)
-					bmp->SetColor(i, j, data[i][j]);
-		}*/
-
 		void makeDemo(int _H,int _W) {
-			O = Vector3(-2, 2, 0.5);
-			N = Vector3(0.6, 1, -0.6);
+			O = Vector(-2, 2, 0.5);
+			N = Vector(0.6, 1, -0.6);
 			H = _H;
 			W = _W;
 			//lens_H = 0.6;
@@ -56,7 +48,7 @@ namespace tl {
 			lens_W = 1;
 		}
 
-		Vector3 GetO() { return O; }
+		Vector GetO() { return O; }
 		int GetW() { return W; }
 		int GetH() { return H; }
 		double GetShadeQuality() { return SHADE_QUALITY; }

@@ -13,23 +13,10 @@ namespace tl {
 	public:
 		double r, g, b;//range from 0-1
 		Color(double r = 0, double g = 0, double b = 0) :r(r), g(g), b(b) {}
-		void normalize() {
-			if (r < 0) r = 0;
-			if (g < 0) g = 0;
-			if (b < 0) b = 0;
-			if (r > 1) r = 1;
-			if (g > 1) g = 1;
-			if (b > 1) b = 1;
-		}
-		
-		Color normal() const {
-			Color c = *this;
-			c.normalize();
-			return c;
-		}
+
 		static Color Red, Green, Blue, Black, White, Cyano, Purple, Yellow;
 
-		void Color::Confine() {
+		void Color::normalize() {
 			if (r > 1) r = 1;
 			if (g > 1) g = 1;
 			if (b > 1) b = 1;

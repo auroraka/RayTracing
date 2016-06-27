@@ -23,7 +23,6 @@ namespace tl {
 			drefl = 0;
 			texture = NULL;
 		}
-		~Material() {}
 
 	};
 

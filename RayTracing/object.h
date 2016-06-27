@@ -2,7 +2,7 @@
 #define PRIMITIVE_H
 
 #include"color.h"
-#include"vector3.h"
+#include"vector.h"
 #include "picture.h"
 #include "material.h"
 #include "basic.h"
@@ -13,8 +13,8 @@
 
 namespace tl {
 
-	struct Crash {
-		Vector3 N, C;
+	struct IntersectResult {
+		Vector N, C;
 		double dist;
 		bool front;
 	};
@@ -28,7 +28,7 @@ namespace tl {
 		Object* next;
 
 	public:
-		Crash crash;
+		IntersectResult irst;
 
 		Object() {
 			sample = rand();
@@ -49,7 +49,7 @@ namespace tl {
 		Object* GetNext() { return next; }
 		void SetNext(Object* obj) { next = obj; }
 
-		virtual bool Collide(Vector3 ray_O, Vector3 ray_V) = 0;
+		virtual bool intersect(Vector ray_O, Vector ray_V) = 0;
 		virtual Color GetTexture() = 0;
 		virtual Object* PrimitiveCopy() = 0;
 		virtual void makeDemo(int i) = 0;
@@ -61,22 +61,22 @@ namespace tl {
 
 
 	class Sphere : public Object {
-		Vector3 O, De, Dc;
+		Vector O, De, Dc;
 		double R;
 
 	public:
 		Sphere() : Object() {
-			De = Vector3(0, 0, 1);
-			Dc = Vector3(0, 1, 0);
+			De = Vector(0, 0, 1);
+			Dc = Vector(0, 1, 0);
 		}
 		~Sphere() {}
 
 		void Input(std::string, std::stringstream&);
-		bool Collide(Vector3 ray_O, Vector3 ray_V) {
-			ray_V = ray_V.GetUnitVector();
-			Vector3 P = ray_O - O;
+		bool intersect(Vector ray_O, Vector ray_V) {
+			ray_V = ray_V.normal();
+			Vector P = ray_O - O;
 			double b = -P.Dot(ray_V);
-			double det = b * b - P.Module2() + R * R;
+			double det = b * b - P.len2() + R * R;
 
 			if (det > EPS) {
 				det = sqrt(det);
@@ -84,25 +84,25 @@ namespace tl {
 
 				if (x2 < EPS) return false;
 				if (x1 > EPS) {
-					crash.dist = x1;
-					crash.front = true;
+					irst.dist = x1;
+					irst.front = true;
 				}
 				else {
-					crash.dist = x2;
-					crash.front = false;
+					irst.dist = x2;
+					irst.front = false;
 				}
 			}
 			else
 				return false;
 
-			crash.C = ray_O + ray_V * crash.dist;
-			crash.N = (crash.C - O).GetUnitVector();
-			if (crash.front == false) crash.N = -crash.N;
+			irst.C = ray_O + ray_V * irst.dist;
+			irst.N = (irst.C - O).normal();
+			if (irst.front == false) irst.N = -irst.N;
 			return true;
 		}
 
 		Color GetTexture() {
-			Vector3 I = (crash.C - O).GetUnitVector();
+			Vector I = (irst.C - O).normal();
 			double a = acos(-I.Dot(De));
 			double b = acos(std::min(std::max(I.Dot(Dc) / sin(a), -1.0), 1.0));
 			double u = a / PI, v = b / 2 / PI;
@@ -118,21 +118,21 @@ namespace tl {
 		void makeDemo(int i) {
 			std::cout << "make sphere " << i << std::endl;
 			if (i == 0) {
-				O = Vector3(0, 8, -1.5);
+				O = Vector(0, 8, -1.5);
 				R = 0.5;
 				material->refr = 1;
 				material->rindex = 1.7;
 				material->absor = Color(0, 0, 0);
 			}
 			if (i == 1) {
-				O = Vector3(3, 8, -1.5);
+				O = Vector(3, 8, -1.5);
 				R = 0.5;
 				material->refr = 0.9;
 				material->rindex = 1;
 				material->absor = Color(1, 0, 0);
 			}
 			if (i == 2) {
-				O = Vector3(6, 9, -1.5);
+				O = Vector(6, 9, -1.5);
 				R = 0.4;
 				material->refr = 0.5;
 				material->rindex = 1.5;
@@ -142,17 +142,17 @@ namespace tl {
 				material->refl = 0.4;
 			}
 			if (i == 3) {
-				O = Vector3(1.5, 6.3, -1.6);
+				O = Vector(1.5, 6.3, -1.6);
 				R = 0.4;
 				material->color = Color(0.5, 0.5, 1);
 				material->spec = 0.2;
 				material->refl = 0.8;
 			}
 			if (i == 4) {
-				O = Vector3(0, 6, -1.5);
+				O = Vector(0, 6, -1.5);
 				R = 0.5;
-				De = Vector3(0, 0, 1);
-				Dc = Vector3(0, 1, 0);
+				De = Vector(0, 0, 1);
+				Dc = Vector(0, 1, 0);
 				material->color = Color(1, 1, 1);
 				material->diff = 0.15;
 				material->spec = 0.15;
@@ -165,31 +165,31 @@ namespace tl {
 	};
 
 	class Plane : public Object {
-		Vector3 N, Dx, Dy;
+		Vector N, Dx, Dy;
 		double R;
 
 	public:
 		Plane() : Object() {}
 		~Plane() {}
 
-		bool Collide(Vector3 ray_O, Vector3 ray_V) {
-			ray_V = ray_V.GetUnitVector();
-			N = N.GetUnitVector();
+		bool intersect(Vector ray_O, Vector ray_V) {
+			ray_V = ray_V.normal();
+			N = N.normal();
 			double d = N.Dot(ray_V);
 			if (fabs(d) < EPS) return false;
 			double l = (N * R - ray_O).Dot(N) / d;
 			if (l < EPS) return false;
 
-			crash.dist = l;
-			crash.front = (d < 0);
-			crash.C = ray_O + ray_V * crash.dist;
-			crash.N = (crash.front) ? N : -N;
+			irst.dist = l;
+			irst.front = (d < 0);
+			irst.C = ray_O + ray_V * irst.dist;
+			irst.N = (irst.front) ? N : -N;
 			return true;
 		}
 
 		Color GetTexture() {
-			double u = crash.C.Dot(Dx) / Dx.Module2();
-			double v = crash.C.Dot(Dy) / Dy.Module2();
+			double u = irst.C.Dot(Dx) / Dx.len2();
+			double v = irst.C.Dot(Dy) / Dy.len2();
 			return material->texture->GetSmoothColor(u, v);
 		}
 
@@ -200,10 +200,10 @@ namespace tl {
 
 		void makeDemo(int i) {
 			std::cout << "make plane" << std::endl;
-			N = Vector3(0, 0, 1);
+			N = Vector(0, 0, 1);
 			R = -2;
-			Dx = Vector3(8, 0, 0);
-			Dy = Vector3(0, 8, 0);
+			Dx = Vector(8, 0, 0);
+			Dy = Vector(0, 8, 0);
 			material->color = Color(1, 1, 1);
 			material->diff = 0.3;
 			material->refl = 0.7;

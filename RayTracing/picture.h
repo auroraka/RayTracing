@@ -2,7 +2,7 @@
 #define PICTURE_H
 
 #include "color.h"
-#include "vector3.h"
+#include "vector.h"
 #include <opencv2\opencv.hpp>
 using namespace cv;
 

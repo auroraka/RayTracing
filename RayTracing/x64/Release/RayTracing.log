@@ -6,9 +6,9 @@ D:\YTL\Program\OpenCV3.1.0\build\include\opencv2/core/utility.hpp : warning C481
 d:\ppp\raytracing\raytracing\picture.h(17): warning C4244: “参数”: 从“double”转换到“uchar”，可能丢失数据
 d:\ppp\raytracing\raytracing\raytracer.h(25): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
   正在生成代码
-  36 of 234 functions (15.4%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    6 functions had inline decision re-evaluated but remain unchanged
+  41 of 232 functions (17.7%) were compiled, the rest were copied from previous compilation.
+    7 functions were new in current compilation
+    4 functions had inline decision re-evaluated but remain unchanged
   已完成代码的生成
   RayTracing.vcxproj -> D:\ppp\RayTracing\x64\Release\RayTracing.exe
   RayTracing.vcxproj -> D:\ppp\RayTracing\x64\Release\RayTracing.pdb (Full PDB)
