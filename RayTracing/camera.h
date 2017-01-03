@@ -43,8 +43,7 @@ namespace tl {
 			N = Vector(0.6, 1, -0.6);
 			H = _H;
 			W = _W;
-			//lens_H = 0.6;
-			lens_H = 1;
+			lens_H = 0.5625;
 			lens_W = 1;
 		}
 

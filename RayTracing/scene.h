@@ -49,13 +49,13 @@ namespace tl {
 		}
 
 		void createScene() {
-			int H = 100;
-			int W = 100;
+			int H = 1080;
+			int W = 1920;
+			//int H = 180;
+			//int W = 300;
 			picture = new Picture(H, W);
 			
-			Object* new_primitive = NULL;
-			Light* new_light = NULL;
-
+			
 			background_color = Color(0.1, 0.1, 0.1);
 
 			//cam
@@ -67,7 +67,8 @@ namespace tl {
 
 			//obj
 			Object* obj;
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i <=7; i++) {
+				if (i == 5 || i==0 || i==1) continue;
 				obj = new Sphere;
 				obj->makeDemo(i);
 				objs.push_back(obj);

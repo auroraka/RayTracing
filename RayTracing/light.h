@@ -71,7 +71,7 @@ namespace tl {
 			O = Vector(3, 3, 3);
 			Dx = Vector(1.5, 0, 0);
 			Dy = Vector(0, 1.5, 0);
-			color = Color(1, 1, 1);
+			color = Color(0.5, 0.5, 0.5);
 		}
 
 	};

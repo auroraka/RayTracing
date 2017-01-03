@@ -117,48 +117,71 @@ namespace tl {
 		void makeDemo(int i) {
 			std::cout << "make sphere " << i << std::endl;
 			if (i == 0) {
-				O = Vector(0, 8, -1.5);
-				R = 0.5;
+				O = Vector(-0.5,4.86, -1.8);
+				R = 0.2;
 				material->refr = 1;
 				material->rindex = 1.7;
-				material->absor = Color(0, 0, 0);
-			}
-			if (i == 1) {
-				O = Vector(3, 8, -1.5);
-				R = 0.5;
-				material->refr = 0.9;
-				material->rindex = 1;
 				material->absor = Color(1, 0, 0);
 			}
+			if (i == 1) {
+				O = Vector(0, 5, -1.8);
+				R = 0.2;
+				material->refr = 1;
+				material->rindex = 1.7;
+				material->absor = Color(0, 1, 0);
+			}
 			if (i == 2) {
-				O = Vector(6, 9, -1.5);
-				R = 0.4;
-				material->refr = 0.5;
-				material->rindex = 1.5;
+				O = Vector(0.5, 4.5, -1.8);
+				R = 0.2;
+				material->refr = 1;
+				material->rindex = 1.7;
 				material->absor = Color(0, 0, 1);
-				material->color = Color(0.5, 0.5, 1);
-				material->spec = 0.1;
-				material->refl = 0.4;
+
 			}
 			if (i == 3) {
-				O = Vector(1.5, 6.3, -1.6);
-				R = 0.4;
-				material->color = Color(0.5, 0.5, 1);
-				material->spec = 0.2;
-				material->refl = 0.8;
+				O = Vector(1, 4.3, -1.8);
+				R = 0.2;
+				material->refr = 1;
+				material->rindex = 1.7;
+				material->absor = Color(1, 1, 0);
+				
 			}
 			if (i == 4) {
-				O = Vector(0, 6, -1.5);
+				O = Vector(1.5, 4.5, -1.8);
+				R = 0.2;
+				material->refr = 1;
+				material->rindex = 1.7;
+				material->absor = Color(0, 1, 1);
+			
+			}
+			if (i == 5) {
+				O = Vector(0.1,4.5, -1.3);
+				R = 0.7;
+				material->refr = 1;
+				material->rindex = 1.7;
+				material->absor = Color(0.1, 0, 0);
+			}
+			if (i == 6) {
+				O = Vector(1, 5.5, -1.5);
+				R = 0.4;
+				material->color = Color(1, 1, 1);
+				material->diff = 0.2;
+				material->spec = 0.2;
+				material->refl = 0.8;
+
+			}
+			if (i == 7) {
+				O = Vector(-0.5, 5.5, -1.5);
 				R = 0.5;
 				De = Vector(0, 0, 1);
 				Dc = Vector(0, 1, 0);
 				material->color = Color(1, 1, 1);
-				material->diff = 0.15;
-				material->spec = 0.15;
-				material->refl = 0.8;
-				material->drefl = 0.25;
-				//material->texture = new Picture;
-				//material->texture->Input("test2.jpg");
+				material->diff = 0.45;
+				material->spec = 0.25;
+				material->texture = new Picture;
+				material->texture->read("test6.jpg");
+				
+
 			}
 		}
 	};
@@ -208,7 +231,7 @@ namespace tl {
 			material->refl = 0.7;
 			material->drefl = 0.15;
 			material->texture = new Picture;
-			material->texture->read("test1.jpg");
+			material->texture->read("test6.jpg");
 
 
 		}
